@@ -1,0 +1,24 @@
+****************************  START_MSG   *************************
+*******************************************************************
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+
+StartMsg := class(creative_device):
+
+    @editable 
+        GameAlert : hud_message_device = hud_message_device{}
+    @editable
+        AgentSpawn : player_spawner_device = player_spawner_device{}
+        
+        GameStartMsg<localizes> : message = "WELCOME"
+            # Runs when the device is started in a running game
+        OnBegin<override>()<suspends>:void=
+            GameAlert.SetText(GameStartMsg)
+            GameAlert.SetDisplayTime(8.0)
+                     
+        OnAgentSpawned(Agent: agent):void =
+             GameAlert.Show(Agent) 
+ ***************************************************************     
+  *HUD DEVICE settings*  
+ ***************************************************************   
