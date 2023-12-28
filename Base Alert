@@ -1,0 +1,26 @@
+***************BASE_ALERT**************************************
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+
+Area_Trigger := class(creative_device):
+
+        @editable 
+            Trigger : mutator_zone_device = mutator_zone_device{}
+        @editable 
+            TeamAlert : hud_message_device = hud_message_device{}
+       
+            AlertMessage<localizes> : message = "Crimson On Base!!"    
+
+            # Runs when the device is started in a running game
+            
+        OnBegin<override>()<suspends>:void=
+            Trigger.AgentEntersEvent.Subscribe(OnTriggered)
+            
+        OnTriggered(Agent : agent):void = 
+            TeamAlert.SetText(AlertMessage)
+            TeamAlert.SetDisplayTime(8.0)
+            TeamAlert.Show(Agent)
+**********************************************************************
+*** MUTATOR_ZONE, HUD_Device  **** check settings** 
+***********************************************************************
