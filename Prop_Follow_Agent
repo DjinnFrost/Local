@@ -1,0 +1,105 @@
+*******************************************************************************************************************************************************
+EDited BEAST PLAYER FOLLOW  (BEAST Z is ABSOLUTE when placing mesh)  Mutator Zone Trigger
+****************************************************************************************************************
+
+
+
+using { /Fortnite.com/Devices }
+using { /Fortnite.com/Characters }
+using { /Verse.org/Simulation }
+using { /Verse.org/Random }
+using { /UnrealEngine.com/Temporary/Diagnostics }
+using { /UnrealEngine.com/Temporary/UI }
+using { /Fortnite.com/UI }
+using { /UnrealEngine.com/Temporary/SpatialMath}
+using { /Verse.org/Colors }
+using { /Verse.org/Colors/NamedColors }
+using { /Fortnite.com/Playspaces }
+using { /Verse.org/Concurrency }
+
+Beast_Battle_Wendigo := class(creative_device):
+    
+    @editable 
+        Beast : creative_prop = creative_prop{}
+    @editable 
+        BeastSwingCinema : cinematic_sequence_device = cinematic_sequence_device{}
+    @editable 
+        BeastWalkCinema : cinematic_sequence_device = cinematic_sequence_device{}
+    @editable
+        BeastManip : prop_manipulator_device = prop_manipulator_device{}
+    @editable 
+        BeastZone : mutator_zone_device = mutator_zone_device{}
+        
+        # Runs when the device is started in a running game
+        OnBegin<override>()<suspends>:void=
+            BeastZone.AgentEntersEvent.Subscribe(OnBeastZone)
+            
+        OnBeastZone(Agent : agent):void = 
+            spawn:
+                OnBeastZoneTask()
+
+        OnBeastZoneTask()<suspends>:void =
+            loop:
+                RotateBeastTowardPlayer()
+                BeastWalkAnimation()
+                BeastSwingAnimation()
+                
+
+ 
+
+
+    # BeastWalkAnimation()<suspends>:void=
+        #   BeastWalkCinema.Play()
+        #   AllPlayers := GetPlayspace().GetPlayers()
+        #   if (Player := AllPlayers[0], Agent := agent[Player], Fort := Agent.GetFortCharacter[]):
+        #       PlayerTran := Fort.GetTransform()
+        #       Beast.MoveTo(PlayerTran.Translation -vector3{Z:=45.0}, Beast.GetTransform().Rotation, 3.13)
+
+        BeastWalkAnimation()<suspends>:void=
+            BeastWalkCinema.Play()
+            AllPlayers := GetPlayspace().GetPlayers()
+            if (Player := AllPlayers[0], Agent := agent[Player], Fort := Agent.GetFortCharacter[]):
+            
+                PlayerTran := Fort.GetTransform().Translation
+                BeastTran := Beast.GetTransform().Translation
+                
+                
+
+                MoveLocation := 
+                    vector3{X := PlayerTran.X, Y := PlayerTran.Y, Z := BeastTran.Z}
+                
+                
+                var DistancesX : float = Abs(BeastTran.X - PlayerTran.X)
+                var DistancesY : float = Abs(BeastTran.Y - PlayerTran.Y)
+
+                    
+                Speed := (800.0)
+                SpeedtimeX := (DistancesX / Speed)
+                SpeedtimeY := (DistancesY / Speed)
+                Speedtime := ((SpeedtimeX + SpeedtimeY) / 2.0)
+
+                Beast.MoveTo(MoveLocation, Beast.GetTransform().Rotation, Speedtime)            
+                BeastWalkCinema.Stop()
+
+    ######################################################
+
+        BeastSwingAnimation()<suspends>:void=
+            BeastSwingCinema.Play()
+            Sleep(2.77)
+
+        RotateBeastTowardPlayer()<suspends>:void=
+                AllPlayers := GetPlayspace().GetPlayers()
+                if (Player := AllPlayers[0], Agent := agent[Player], Fort := Agent.GetFortCharacter[]):
+            
+                    PropLocation := Beast.GetTransform().Translation
+                    PlayerLocation := Fort.GetTransform().Translation
+        
+                    if (LookDirection := (PlayerLocation - PropLocation).MakeUnitVector[]):
+        
+                        Yaw := RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X)) - 90.0
+                        Pitch := RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                        Roll := 0.0
+        
+                        NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)
+        
+                        Beast.MoveTo(Beast.GetTransform().Translation, NewRotation, 0.01) #2.0
